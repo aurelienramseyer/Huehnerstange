@@ -10,13 +10,13 @@
     html,body { margin:0; padding:0; width:100%; height:100%; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,sans-serif; overflow:hidden; overscroll-behavior:none; }
     .app { display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:520px; margin:0 auto; padding:6px 8px; gap:6px; }
     .topbar, .controls { background:var(--panel); border-radius:14px; padding:6px 10px; flex-shrink:0; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; gap:6px; }
-    .scoreboard { display:flex; align-items:center; gap:6px; font-weight:800; font-size:13px; }
-    .pill { display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:10px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:5px; }
+    .scoreboard { display:flex; align-items:center; gap:5px; font-weight:800; font-size:13px; }
+    .pill { display:flex; align-items:center; gap:4px; padding:4px 7px; border-radius:10px; }
     .pill.red { background:rgba(239,68,68,.2); color:#fca5a5; border:1px solid rgba(239,68,68,.4); }
     .pill.blue { background:rgba(59,130,246,.2); color:#93c5fd; border:1px solid rgba(59,130,246,.4); }
-    .top-actions { display:flex; gap:5px; }
-    button { border:none; border-radius:10px; background:var(--p2); color:var(--txt); font-weight:700; font-size:12px; padding:7px 10px; cursor:pointer; }
+    .top-actions { display:flex; gap:4px; }
+    button { border:none; border-radius:10px; background:var(--p2); color:var(--txt); font-weight:700; font-size:12px; padding:7px 9px; cursor:pointer; }
     button:active { transform:scale(.94); }
     button.active { background:var(--gold); color:#111827; }
     button.green-btn { background:#10b981; color:#052e16; }
@@ -35,12 +35,20 @@
     .lbl { font-size:11px; color:var(--mut); font-weight:700; }
     .stats { display:flex; justify-content:space-around; font-size:11px; color:var(--mut); border-top:1px solid rgba(255,255,255,.08); padding-top:5px; }
     .stats b { color:#f3f4f6; }
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:16px; z-index:50; }
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:14px; z-index:50; }
     .modal-bg.open { display:flex; }
-    .modal { background:var(--panel); border-radius:18px; max-width:440px; width:100%; max-height:85vh; overflow-y:auto; padding:18px; font-size:13px; line-height:1.45; }
+    .modal { background:var(--panel); border-radius:18px; max-width:460px; width:100%; max-height:86vh; overflow-y:auto; padding:16px; font-size:13px; line-height:1.45; }
     .modal h2 { margin:0 0 8px; font-size:17px; color:#fde68a; }
-    .modal h3 { margin:12px 0 4px; font-size:14px; color:#93c5fd; }
+    .modal h3 { margin:12px 0 6px; font-size:14px; color:#93c5fd; }
     .modal ul { margin:4px 0 0 18px; padding:0; }
+    .roster-card { background:#111827; border-radius:10px; padding:8px 10px; margin-bottom:6px; border:1px solid rgba(255,255,255,.08); }
+    .roster-card.star { border-color:rgba(245,158,11,.6); background:rgba(245,158,11,.08); }
+    .roster-head { display:flex; justify-content:space-between; font-weight:800; font-size:12px; margin-bottom:5px; }
+    .bars { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; font-size:11px; }
+    .bar-row { display:flex; align-items:center; gap:5px; }
+    .bar-bg { flex:1; height:6px; background:#374151; border-radius:99px; overflow:hidden; }
+    .bar-fill { height:100%; background:#60a5fa; border-radius:99px; }
+    .bar-fill.boost { background:#fbbf24; }
     #errBox { display:none; background:#7f1d1d; color:#fecaca; padding:8px; border-radius:10px; font-size:12px; text-align:center; }
   </style>
 </head>
@@ -54,9 +62,10 @@
       <div class="pill blue">🔵 <span id="sBlue">0</span> <span id="aBlue" style="font-size:11px">(5/5)</span></div>
     </div>
     <div class="top-actions">
-      <button id="btnSound">🔊</button>
-      <button id="btnPause">⏸️</button>
-      <button id="btnHelp">❓</button>
+      <button id="btnSound" title="Son">🔊</button>
+      <button id="btnPause" title="Pause">⏸️</button>
+      <button id="btnStats" title="Niveaux des joueurs">📊</button>
+      <button id="btnHelp" title="Règles">❓</button>
     </div>
   </div>
 
@@ -89,22 +98,32 @@
   </div>
 </div>
 
+<!-- RÈGLES -->
 <div class="modal-bg" id="helpModal">
   <div class="modal">
     <h2>🐔 Règles : Hühnerstange</h2>
     <ul>
       <li><b>Banc dans le camp adverse :</b> Les Bleus jouent en bas (leur banc est tout en haut). Les Rouges jouent en haut (leur banc est tout en bas).</li>
-      <li><b>Touché :</b> Un tir direct (sans rebond au sol) envoie le joueur sur le banc de son équipe.</li>
-      <li><b>Jeu depuis le banc :</b> Sur le banc, on récupère les balles derrière la ligne pointillée pour faire des passes ou viser les adversaires dans le dos.</li>
+      <li><b>Trajet à pied :</b> Les poules touchées ou libérées longent le bord du terrain à pied à vitesse normale pour rejoindre le banc ou leur camp.</li>
+      <li><b>Niveaux & Stars (⭐) :</b> Chaque poule a sa propre vitesse, précision, force et capacité à attraper. Chaque équipe possède <b>1 Star (⭐)</b> très forte dans <b>2 catégories aléatoires</b> (bouton <b>📊</b> pour voir les profils).</li>
       <li><b>Libération :</b> Toucher un adversaire depuis le banc te libère ! Rattraper un tir au vol (<i>Catch</i>) élimine le lanceur et libère un allié.</li>
     </ul>
     <h3>🎮 Contrôles (Mode Joueur)</h3>
     <ul>
-      <li><b>Glisser un doigt :</b> déplace ton capitaine bleu (couronne), même sur le banc !</li>
+      <li><b>Glisser un doigt :</b> déplace ton capitaine bleu (👑), même sur le banc !</li>
       <li><b>Taper sur l'écran (avec balle) :</b> tire vers cet endroit (ou passe si tu tapes près d'un allié).</li>
       <li><b>Bouton rond :</b> Esquive/Catch (mains vides) ou Tir Auto (avec balle).</li>
     </ul>
     <button style="width:100%;margin-top:12px;padding:10px;background:#3b82f6" id="btnCloseHelp">Fermer</button>
+  </div>
+</div>
+
+<!-- STATS JOUEURS -->
+<div class="modal-bg" id="statsModal">
+  <div class="modal">
+    <h2>📊 Profil des Poules (Manche en cours)</h2>
+    <div id="statsBody"></div>
+    <button style="width:100%;margin-top:10px;padding:10px;background:#3b82f6" id="btnCloseStats">Fermer</button>
   </div>
 </div>
 
@@ -123,23 +142,16 @@ window.onerror = function(msg, url, line) {
 
   function rrect(x, y, w, h, r) {
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
   }
 
   function resize() {
     const rect = stageWrap.getBoundingClientRect();
-    let cw = rect.width || 320;
-    let ch = cw / (W / H);
-    const maxH = rect.height || 480;
+    let cw = rect.width || 320, ch = cw / (W / H), maxH = rect.height || 480;
     if (ch > maxH) { ch = maxH; cw = ch * (W / H); }
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.style.width = Math.floor(cw) + 'px';
@@ -186,25 +198,57 @@ window.onerror = function(msg, url, line) {
     }
   }
 
+  // Generate random attributes (0..1 normalized, Stars get ~0.95..1.0 in 2 random categories!)
+  function rollTeamAttrs(n) {
+    const starIdx = Math.floor(Math.random() * n);
+    const cats = ['spd', 'acc', 'pwr', 'cat'];
+    const list = [];
+    for (let i = 0; i < n; i++) {
+      const attrs = {
+        spd: rand(0.25, 0.72),
+        acc: rand(0.25, 0.75),
+        pwr: rand(0.25, 0.72),
+        cat: rand(0.20, 0.70)
+      };
+      let starCats = [];
+      if (i === starIdx) {
+        const shuffled = [...cats].sort(() => Math.random() - 0.5);
+        starCats = [shuffled[0], shuffled[1]];
+        attrs[starCats[0]] = rand(0.94, 1.0);
+        attrs[starCats[1]] = rand(0.94, 1.0);
+      }
+      list.push({ attrs, isStar: i === starIdx, starCats });
+    }
+    return list;
+  }
+
   function startRound() {
     st.players=[]; st.balls=[]; st.parts=[]; st.pops=[];
     st.time=0; st.sudden=false; st.over=false; st.winner=null; st.endT=0;
     const n = st.teamN, sp = (C.right - C.left - 80) / Math.max(1, n-1);
+    const redRolls = rollTeamAttrs(n);
+    const blueRolls = rollTeamAttrs(n);
+
     for (let i=0; i<n; i++) {
       const px = C.left + 40 + i*sp;
+      const rr = redRolls[i], br = blueRolls[i];
       st.players.push({
-        team:'red', hum:false, x:px+rand(-10,10), y:C.midY-rand(95,165), vx:0, vy:0, r:14,
-        bench:false, slot:i, ball:null, ang:Math.PI/2, wait:0, dash:0, dCd:0, catW:0, inv:0, flap:rand(0,9),
-        reactT:rand(0,0.22), dodgeT:0, dodgeX:0, dodgeY:0
+        num: i+1, team:'red', hum:false, x:px+rand(-10,10), y:C.midY-rand(95,165), vx:0, vy:0, r:14,
+        bench:false, transit:null, wps:[], slot:i, ball:null, ang:Math.PI/2,
+        wait:0, dash:0, dCd:0, catW:0, inv:0, flap:rand(0,9),
+        reactT:rand(0,0.22), dodgeT:0, dodgeX:0, dodgeY:0,
+        attrs: rr.attrs, isStar: rr.isStar, starCats: rr.starCats
       });
       st.players.push({
-        team:'blue', hum:(i===Math.floor(n/2)), x:px+rand(-10,10), y:C.midY+rand(95,165), vx:0, vy:0, r:14,
-        bench:false, slot:i, ball:null, ang:-Math.PI/2, wait:0, dash:0, dCd:0, catW:0, inv:0, flap:rand(0,9),
-        reactT:rand(0,0.22), dodgeT:0, dodgeX:0, dodgeY:0
+        num: i+1, team:'blue', hum:(i===Math.floor(n/2)), x:px+rand(-10,10), y:C.midY+rand(95,165), vx:0, vy:0, r:14,
+        bench:false, transit:null, wps:[], slot:i, ball:null, ang:-Math.PI/2,
+        wait:0, dash:0, dCd:0, catW:0, inv:0, flap:rand(0,9),
+        reactT:rand(0,0.22), dodgeT:0, dodgeX:0, dodgeY:0,
+        attrs: br.attrs, isStar: br.isStar, starCats: br.starCats
       });
     }
     for (let i=0; i<st.ballsN; i++) {
-      st.balls.push({ x:W/2+(i-(st.ballsN-1)/2)*75, y:C.midY+(i%2?-12:12), z:0, vx:0, vy:0, vz:0, r:9, state:'loose', own:null, team:null, thrower:null, fromBench:false, pass:false, pwr:false, tr:[] });
+      st.balls.push({ x:W/2+(i-(st.ballsN-1)/2)*75, y:C.midY+(i%2?-12:12), z:0, vx:0, vy:0, vz:0, r:9, state:'loose', own:null, team:null, thrower:null, fromBench:false, throwPwr:0.5, pass:false, pwr:false, tr:[] });
     }
     syncHUD();
   }
@@ -215,16 +259,13 @@ window.onerror = function(msg, url, line) {
     return {a, b};
   }
 
-  // Bounds with full access behind the dashed line!
   function bounds(p) {
-    const minX = C.left + p.r + 2;
-    const maxX = C.right - p.r - 2;
+    const minX = C.left + p.r + 2, maxX = C.right - p.r - 2;
     if (p.bench) {
       return p.team === 'blue'
         ? { minX, maxX, minY: C.topW + p.r + 2, maxY: C.topLine }
         : { minX, maxX, minY: C.botLine, maxY: C.botW - p.r - 2 };
     }
-    // If opponent bench behind us is EMPTY, active players can reach all the way to the back wall to grab loose balls!
     if (p.team === 'red') {
       const oppBenchCount = counts('blue').b;
       return { minX, maxX, minY: oppBenchCount === 0 ? C.topW + p.r + 2 : C.topLine + p.r, maxY: C.midY - p.r - 2 };
@@ -238,16 +279,29 @@ window.onerror = function(msg, url, line) {
     const b = p.ball; if (!b) return;
     p.ball = null; b.own = null; b.state = 'thrown'; b.team = p.team; b.thrower = p;
     b.fromBench = p.bench;
-    b.pass = !!(opts && opts.pass); b.pwr = !!(opts && opts.pwr); b.tr = [];
-    const dx = tx - p.x, dy = ty - p.y, d = Math.max(1, Math.hypot(dx, dy));
+    b.throwPwr = p.attrs.pwr;
+    b.pass = !!(opts && opts.pass);
+    b.pwr = !!(opts && opts.pwr) || (!b.pass && p.attrs.pwr >= 0.88);
+    b.tr = [];
+
+    // Apply player's accuracy on manual throws slightly too (tiny variance if low acc, laser if high acc)
+    let aimX = tx, aimY = ty;
+    if (!b.pass && st.mode === 'play' && p.hum && !(opts && opts.auto)) {
+      const jitter = (1 - p.attrs.acc) * 8;
+      aimX += rand(-jitter, jitter);
+      aimY += rand(-jitter, jitter);
+    }
+
+    const dx = aimX - p.x, dy = aimY - p.y, d = Math.max(1, Math.hypot(dx, dy));
     p.ang = Math.atan2(dy, dx);
-    let spd = b.pass ? 410 : (b.pwr ? 640 : 540);
+    let spd = b.pass ? 410 : (440 + p.attrs.pwr * 225);
+    if (opts && opts.pwr && !b.pass) spd = Math.max(spd, 635);
     if (st.sudden && !b.pass) spd *= 1.15;
+
     const G = 420;
     const ft = clamp(d / spd, 0.14, 1.25);
     b.x = p.x + (dx/d)*(p.r+6); b.y = p.y + (dy/d)*(p.r+6); b.z = 16;
     b.vx = (dx/d)*spd; b.vy = (dy/d)*spd;
-    // Keep ball at chest height (z ~ 14) at target distance so it doesn't bounce short
     b.vz = 0.5 * G * ft - 2 / ft + (b.pass ? 45 : 0);
     p.wait = 0.3;
     tone(260, 520, 0.08, 'sine');
@@ -257,16 +311,25 @@ window.onerror = function(msg, url, line) {
     if (p.bench) return;
     if (p.ball) { const b=p.ball; p.ball=null; b.own=null; b.state='loose'; b.z=0; b.vx=rand(-50,50); b.vy=rand(-50,50); }
     p.bench = true; p.inv = 0.6; p.dodgeT = 0;
-    p.x = clamp(p.x, C.bxMin, C.bxMax);
-    p.y = p.team==='blue' ? C.bBenchY : C.rBenchY;
-    p.ang = p.team==='blue' ? Math.PI/2 : -Math.PI/2;
+
+    // Walk along the nearest sideline to the bench (NO teleportation!)
+    const sx = p.x < W / 2 ? C.left + 2 : C.right - 2;
+    const benchY = p.team === 'blue' ? C.bBenchY : C.rBenchY;
+    const benchX = clamp(C.bxMin + ((p.slot + 0.5) / st.teamN) * (C.bxMax - C.bxMin), C.bxMin, C.bxMax);
+    p.transit = 'toBench';
+    p.wps = [
+      { x: sx, y: clamp(p.y, C.topLine + 12, C.botLine - 12) },
+      { x: sx, y: benchY },
+      { x: benchX, y: benchY }
+    ];
+
     feathers(p.x, p.y, p.team==='blue'?'#60a5fa':'#f87171', 12);
-    popup(p.x, p.y+(p.team==='blue'?26:-20), '🪵 PERCHÉ !', '#fde68a');
+    popup(p.x, p.y+(p.team==='blue'?22:-20), '🪵 TOUCHÉ !', '#fde68a');
     st.stats.hits++;
     tone(420, 170, 0.15, 'sawtooth');
     const r = counts('red'), bl = counts('blue');
     if ((r.a===0 || bl.a===0) && !st.over) {
-      st.over = true; st.endT = 2.5;
+      st.over = true; st.endT = 2.6;
       st.winner = r.a===0 ? 'blue' : 'red';
       st.score[st.winner]++;
       tone(520, 780, 0.35, 'square');
@@ -276,29 +339,72 @@ window.onerror = function(msg, url, line) {
 
   function freeBench(p, txt) {
     if (!p.bench) return;
-    p.bench = false; p.inv = 1.1; p.dodgeT = 0;
-    p.y = p.team==='blue' ? C.midY+95 : C.midY-95;
-    p.x = clamp(p.x, 70, W-70);
+    if (p.ball) { const b=p.ball; p.ball=null; b.own=null; b.state='loose'; b.z=0; b.vx=rand(-40,40); b.vy=rand(-40,40); }
+    p.bench = false; p.inv = 1.2; p.dodgeT = 0;
+
+    // Walk back along the nearest sideline to own half (NO teleportation!)
+    const sx = p.x < W / 2 ? C.left + 2 : C.right - 2;
+    const homeY = p.team === 'blue' ? C.midY + 95 : C.midY - 95;
+    const sp = (C.right - C.left - 80) / Math.max(1, st.teamN - 1);
+    const homeX = clamp(C.left + 40 + p.slot * sp, 60, W - 60);
+    p.transit = 'toCourt';
+    p.wps = [
+      { x: sx, y: p.y },
+      { x: sx, y: homeY },
+      { x: homeX, y: homeY }
+    ];
+
     feathers(p.x, p.y, '#34d399', 10);
     popup(p.x, p.y, txt||'🕊️ LIBÉRÉ !', '#6ee7b7');
     st.stats.freed++;
   }
 
   function dashOrAct(p) {
-    if (!p) return;
+    if (!p || p.transit) return;
     if (p.ball) {
-      const en = st.players.filter(e => e.team!==p.team && !e.bench);
+      const en = st.players.filter(e => e.team!==p.team && !e.bench && !e.transit);
       if (en.length) {
         let best = en[0], bd = Infinity;
         for (const e of en) { const d = dist(p, e); if (d < bd) { bd = d; best = e; } }
-        const lead = clamp(bd/640, 0.04, 0.30);
-        throwBall(p, best.x + best.vx*lead, best.y + best.vy*lead, {pwr:true});
+        const spd = 440 + p.attrs.pwr * 225;
+        const lead = clamp(bd/spd, 0.04, 0.32) * (0.5 + p.attrs.acc * 0.5);
+        const err = (1 - p.attrs.acc) * 18;
+        throwBall(p, best.x + best.vx*lead + rand(-err,err), best.y + best.vy*lead + rand(-err,err), {pwr:true, auto:true});
       }
       return;
     }
     if (p.dCd > 0) return;
-    p.dash = 0.22; p.catW = 0.36; p.dCd = 0.95;
+    p.dash = 0.22;
+    p.catW = 0.26 + p.attrs.cat * 0.26;
+    p.dCd = 0.95;
     popup(p.x, p.y-20, '⚡ ESQUIVE', '#7dd3fc');
+  }
+
+  function updateTransit(p, dt) {
+    if (!p.wps || p.wps.length === 0) {
+      if (p.transit === 'toCourt') p.inv = 0.8;
+      p.transit = null; p.vx = 0; p.vy = 0;
+      return;
+    }
+    const wp = p.wps[0];
+    const dx = wp.x - p.x, dy = wp.y - p.y;
+    const d = Math.hypot(dx, dy);
+    // Normal walking speed along the court sideline
+    const walkSpd = 140 + p.attrs.spd * 35;
+    if (d < 8) {
+      p.x = wp.x; p.y = wp.y;
+      p.wps.shift();
+      if (p.wps.length === 0) {
+        if (p.transit === 'toCourt') p.inv = 0.8;
+        p.transit = null; p.vx = 0; p.vy = 0;
+      }
+    } else {
+      p.vx = (dx / d) * walkSpd;
+      p.vy = (dy / d) * walkSpd;
+      p.ang = Math.atan2(p.vy, p.vx);
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+    }
   }
 
   function updateAI(p, dt) {
@@ -308,13 +414,13 @@ window.onerror = function(msg, url, line) {
     const bnd = bounds(p);
     let mx=0, my=0;
 
-    // 1. Realistic reaction-delayed dodge (not instant 0ms radar!)
+    // 1. Reaction-delayed dodge (faster/more alert if high speed!)
     if (!p.bench && p.reactT <= 0) {
-      p.reactT = rand(0.18, 0.30);
+      p.reactT = rand(0.18, 0.30) - p.attrs.spd * 0.05;
       let threat = null, minT = 9999;
       for (const b of st.balls) {
         if (b.state==='thrown' && !b.pass && b.team!==p.team) {
-          const maxLook = b.fromBench ? 95 : 140; // Harder to notice shots from behind!
+          const maxLook = b.fromBench ? 95 : 140;
           const s = Math.hypot(b.vx, b.vy)||1, dot = ((p.x-b.x)*b.vx + (p.y-b.y)*b.vy)/s;
           if (dot>0 && dot<maxLook) {
             const perp = Math.abs((p.x-b.x)*(-b.vy/s) + (p.y-b.y)*(b.vx/s));
@@ -322,7 +428,7 @@ window.onerror = function(msg, url, line) {
           }
         }
       }
-      if (threat && Math.random() < 0.78) {
+      if (threat && Math.random() < (0.65 + p.attrs.spd * 0.25)) {
         const s = Math.hypot(threat.vx, threat.vy)||1, nx = -threat.vy/s, ny = threat.vx/s;
         const side = ((p.x-threat.x)*nx + (p.y-threat.y)*ny)>=0 ? 1 : -1;
         p.dodgeX = nx * side * 1.45;
@@ -332,7 +438,7 @@ window.onerror = function(msg, url, line) {
     }
     if (p.dodgeT > 0) { mx += p.dodgeX; my += p.dodgeY; }
 
-    // 2. Chase loose balls (including behind the dashed line!)
+    // 2. Grab loose balls
     if (!p.ball && p.dodgeT <= 0) {
       let best=null, bd=Infinity;
       for (const b of st.balls) {
@@ -341,17 +447,17 @@ window.onerror = function(msg, url, line) {
         if (Math.hypot(b.x-cx, b.y-cy) > 20) continue;
         const d = dist(p, b);
         let closest = true;
-        for (const m of st.players) if (m!==p && m.team===p.team && m.bench===p.bench && !m.ball && dist(m,b) < d-8) { closest=false; break; }
+        for (const m of st.players) if (m!==p && !m.transit && m.team===p.team && m.bench===p.bench && !m.ball && dist(m,b) < d-8) { closest=false; break; }
         if (closest && d < bd) { bd = d; best = b; }
       }
       if (best) { const d = dist(p,best)||1; mx += ((best.x-p.x)/d)*1.5; my += ((best.y-p.y)/d)*1.5; }
     }
 
-    // 3. Throw or pass
+    // 3. Throw or pass (using player's accuracy & power!)
     if (p.ball && p.wait<=0) {
-      const en = st.players.filter(e => e.team!==p.team && !e.bench);
-      const bm = st.players.filter(m => m.team===p.team && m.bench);
-      const cm = st.players.filter(m => m.team===p.team && !m.bench);
+      const en = st.players.filter(e => e.team!==p.team && !e.bench && !e.transit);
+      const bm = st.players.filter(m => m.team===p.team && m.bench && !m.transit);
+      const cm = st.players.filter(m => m.team===p.team && !m.bench && !m.transit);
       if (!p.bench && bm.length && Math.random()<0.25) {
         const m = bm[Math.floor(Math.random()*bm.length)];
         throwBall(p, m.x+m.vx*0.18, m.y, {pass:true});
@@ -361,8 +467,10 @@ window.onerror = function(msg, url, line) {
       } else if (en.length) {
         let tgt = en[0], bs = Infinity;
         for (const e of en) { const s = dist(p,e)+Math.random()*55; if (s<bs){bs=s;tgt=e;} }
-        const lead = clamp(dist(p,tgt)/540, 0.04, 0.35);
-        throwBall(p, clamp(tgt.x+tgt.vx*lead+rand(-7,7), C.left+18, C.right-18), tgt.y+tgt.vy*lead+rand(-7,7));
+        const throwSpd = 440 + p.attrs.pwr * 225;
+        const lead = clamp(dist(p,tgt)/throwSpd, 0.04, 0.38) * (0.45 + p.attrs.acc * 0.55);
+        const scatter = (1 - p.attrs.acc) * 26;
+        throwBall(p, clamp(tgt.x+tgt.vx*lead+rand(-scatter,scatter), C.left+18, C.right-18), tgt.y+tgt.vy*lead+rand(-scatter,scatter));
       }
     }
 
@@ -380,13 +488,14 @@ window.onerror = function(msg, url, line) {
       }
     }
     for (const o of st.players) {
-      if (o!==p && o.team===p.team && o.bench===p.bench) {
+      if (o!==p && !o.transit && o.team===p.team && o.bench===p.bench) {
         const d = dist(p, o);
         if (d>0 && d<40) { mx += ((p.x-o.x)/d)*((40-d)/40)*1.1; my += ((p.y-o.y)/d)*((40-d)/40)*1.1; }
       }
     }
-    const mag = Math.hypot(mx, my), spd = p.bench ? 125 : 115;
-    if (mag > 0.05) { p.vx=(mx/mag)*spd*Math.min(1,mag); p.vy=(my/mag)*spd*Math.min(1,mag); if(!p.ball) p.ang=Math.atan2(p.vy,p.vx); }
+    const mag = Math.hypot(mx, my);
+    const baseSpd = (p.bench ? 95 : 88) + p.attrs.spd * 62; // ~103..150 px/s
+    if (mag > 0.05) { p.vx=(mx/mag)*baseSpd*Math.min(1,mag); p.vy=(my/mag)*baseSpd*Math.min(1,mag); if(!p.ball) p.ang=Math.atan2(p.vy,p.vx); }
     else { p.vx*=0.8; p.vy*=0.8; }
   }
 
@@ -395,7 +504,8 @@ window.onerror = function(msg, url, line) {
     if (inp.keys.KeyA||inp.keys.ArrowLeft) mx-=1; if (inp.keys.KeyD||inp.keys.ArrowRight) mx+=1;
     if (inp.keys.KeyW||inp.keys.ArrowUp) my-=1; if (inp.keys.KeyS||inp.keys.ArrowDown) my+=1;
     if (Math.hypot(inp.jv.x, inp.jv.y)>0.05) { mx=inp.jv.x; my=inp.jv.y; }
-    const mag = Math.hypot(mx, my), spd = (p.bench?180:175)*(p.dash>0?1.9:1);
+    const mag = Math.hypot(mx, my);
+    const spd = (145 + p.attrs.spd * 55) * (p.dash>0 ? 1.85 : 1);
     if (mag>0.05) { p.vx=(mx/mag)*spd*Math.min(1,mag); p.vy=(my/mag)*spd*Math.min(1,mag); p.ang=Math.atan2(p.vy,p.vx); }
     else if (p.dash>0) { p.vx=Math.cos(p.ang)*spd; p.vy=Math.sin(p.ang)*spd; }
     else { p.vx*=0.72; p.vy*=0.72; }
@@ -405,6 +515,8 @@ window.onerror = function(msg, url, line) {
     if (st.paused) return;
     const edt = dt * st.speed;
     if (st.over) {
+      // Allow walking players to continue walking nicely while banner shows
+      for (const p of st.players) if (p.transit) { p.flap += dt*9; updateTransit(p, dt); }
       st.endT -= dt; updateParts(dt);
       if (st.endT <= 0) startRound();
       return;
@@ -415,11 +527,16 @@ window.onerror = function(msg, url, line) {
     for (const p of st.players) {
       p.dash=Math.max(0,p.dash-edt); p.dCd=Math.max(0,p.dCd-edt); p.catW=Math.max(0,p.catW-edt); p.inv=Math.max(0,p.inv-edt);
       p.flap += edt*(Math.hypot(p.vx,p.vy)*0.08+3);
+
+      if (p.transit) {
+        updateTransit(p, edt);
+        continue;
+      }
+
       if (st.mode==='play' && p.hum) updateHuman(p); else updateAI(p, edt);
       p.x += p.vx*edt; p.y += p.vy*edt;
       const b = bounds(p);
       p.x = clamp(p.x, b.minX, b.maxX);
-      // Smooth return if an active player was behind the dashed line when someone got benched
       if (!p.bench && p.y < b.minY) p.y = Math.min(b.minY, p.y + 240*edt);
       else if (!p.bench && p.y > b.maxY) p.y = Math.max(b.maxY, p.y - 240*edt);
       else p.y = clamp(p.y, b.minY, b.maxY);
@@ -437,7 +554,9 @@ window.onerror = function(msg, url, line) {
         if (b.y<C.topW+b.r){b.y=C.topW+b.r;b.vy=Math.abs(b.vy)*.65;}
         if (b.y>C.botW-b.r){b.y=C.botW-b.r;b.vy=-Math.abs(b.vy)*.65;}
         for (const p of st.players) {
-          if (!p.ball && dist(p,b) < p.r+b.r+8) { b.state='held'; b.own=p; b.vx=0; b.vy=0; b.vz=0; p.ball=b; p.wait=rand(.15,.38); break; }
+          if (!p.transit && !p.ball && dist(p,b) < p.r+b.r+8) {
+            b.state='held'; b.own=p; b.vx=0; b.vy=0; b.vz=0; p.ball=b; p.wait=rand(.15,.38); break;
+          }
         }
       } else if (b.state==='thrown') {
         b.tr.push({x:b.x, y:b.y-b.z*0.45}); if (b.tr.length>7) b.tr.shift();
@@ -450,7 +569,7 @@ window.onerror = function(msg, url, line) {
         if (wall || b.z<=0) { b.z=0; b.vz=0; b.vx*=.6; b.vy*=.6; b.state='loose'; b.tr=[]; tone(160,90,0.06,'triangle'); continue; }
 
         for (const p of st.players) {
-          if (p===b.thrower || dist(p,b) > p.r+b.r+3) continue;
+          if (p===b.thrower || p.transit || dist(p,b) > p.r+b.r+3) continue;
           if (p.team===b.team) {
             if (!p.ball && (b.pass || p.bench)) {
               b.state='held'; b.own=p; b.vx=0; b.vy=0; b.vz=0; b.z=12; b.tr=[]; p.ball=b; p.wait=0.22;
@@ -465,17 +584,20 @@ window.onerror = function(msg, url, line) {
             break;
           }
           if (b.pass || p.inv>0) continue;
-          const caught = !p.ball && (p.catW>0 || (!(st.mode==='play'&&p.hum) && Math.random()<(b.pwr?.04:.10)));
+
+          // Catch ability vs thrower's power!
+          const aiCatch = (0.02 + p.attrs.cat * 0.28) * (1 - b.throwPwr * 0.28);
+          const caught = !p.ball && (p.catW>0 || (!(st.mode==='play'&&p.hum) && Math.random()<aiCatch));
           if (caught) {
             b.state='held'; b.own=p; b.vx=0; b.vy=0; b.vz=0; b.z=12; b.tr=[]; p.ball=b;
             st.stats.catches++; tone(440,660,0.16,'triangle'); popup(p.x, p.y-20, '🧤 CATCH !', '#34d399');
-            if (b.thrower && !b.thrower.bench) toBench(b.thrower);
-            if (!st.sudden) { const m = st.players.find(x=>x.team===p.team && x.bench); if (m) freeBench(m, '🧤 SAUVÉ !'); }
+            if (b.thrower && !b.thrower.bench && !b.thrower.transit) toBench(b.thrower);
+            if (!st.sudden) { const m = st.players.find(x=>x.team===p.team && x.bench && !x.transit); if (m) freeBench(m, '🧤 SAUVÉ !'); }
             break;
           } else {
             b.state='loose'; b.z=0; b.vx=-b.vx*.25+rand(-40,40); b.vy=-b.vy*.25+rand(-40,40); b.tr=[];
             toBench(p);
-            if (!st.over && !st.sudden && b.thrower && b.thrower.bench) freeBench(b.thrower, '🎯 SNIPE LIBÉRÉ !');
+            if (!st.over && !st.sudden && b.thrower && b.thrower.bench && !b.thrower.transit) freeBench(b.thrower, '🎯 SNIPE LIBÉRÉ !');
             break;
           }
         }
@@ -521,36 +643,51 @@ window.onerror = function(msg, url, line) {
 
     for (const p of st.players) {
       ctx.save(); ctx.translate(p.x, p.y);
-      if (p.inv>0 && Math.floor(p.inv*14)%2===0) ctx.globalAlpha=0.55;
-      if ((st.mode==='play'&&p.hum) || p.catW>0) {
+      if (p.transit) ctx.globalAlpha = 0.72;
+      else if (p.inv>0 && Math.floor(p.inv*14)%2===0) ctx.globalAlpha=0.55;
+
+      if (!p.transit && ((st.mode==='play'&&p.hum) || p.catW>0)) {
         ctx.beginPath(); ctx.arc(0,0,p.r+7,0,Math.PI*2);
         ctx.strokeStyle = p.catW>0 ? '#38bdf8' : '#fbbf24'; ctx.lineWidth = p.catW>0 ? 4 : 2.5; ctx.stroke();
+      } else if (p.isStar) {
+        ctx.beginPath(); ctx.arc(0,0,p.r+4,0,Math.PI*2);
+        ctx.strokeStyle = 'rgba(251,191,36,0.55)'; ctx.lineWidth = 2; ctx.stroke();
       }
+
       ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(0,p.r*0.75,p.r*0.85,p.r*0.4,0,0,Math.PI*2); ctx.fill();
       ctx.rotate(p.ang);
       const wo = Math.sin(p.flap)*2.5;
       ctx.fillStyle = p.team==='blue'?'#1d4ed8':'#b91c1c';
       ctx.beginPath(); ctx.ellipse(-2,-p.r+1-wo,6,4,-0.3,0,Math.PI*2); ctx.ellipse(-2,p.r-1+wo,6,4,0.3,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = p.team==='blue'?'#3b82f6':'#ef4444'; ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+      ctx.fillStyle = p.team==='blue'?'#3b82f6':'#ef4444'; ctx.strokeStyle=p.isStar?'#fde047':'#fff'; ctx.lineWidth=p.isStar?2.5:2;
       ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); ctx.stroke();
       ctx.fillStyle='#fbbf24'; ctx.beginPath(); ctx.moveTo(p.r-1,-4); ctx.lineTo(p.r+8,0); ctx.lineTo(p.r-1,4); ctx.closePath(); ctx.fill();
       ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(5,-4.5,3,0,Math.PI*2); ctx.arc(5,4.5,3,0,Math.PI*2); ctx.fill();
       ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(6,-4.5,1.4,0,Math.PI*2); ctx.arc(6,4.5,1.4,0,Math.PI*2); ctx.fill();
       ctx.restore();
-      if (st.mode==='play' && p.hum) { ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.fillText('👑', p.x, p.y-p.r-7); }
+
+      // Overhead icon: Crown (Human), Star (Team Star), or Walking
+      let badge = '';
+      if (st.mode==='play' && p.hum) badge += '👑';
+      if (p.isStar) badge += '⭐';
+      if (p.transit) badge += '🚶';
+      if (badge) {
+        ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(badge, p.x, p.y - p.r - 6);
+      }
     }
 
     for (const b of [...st.balls].sort((a,c)=>a.z-c.z)) {
       if (b.state==='thrown') {
         for (let i=0; i<b.tr.length; i++) {
-          ctx.fillStyle = b.pass ? 'rgba(56,189,248,0.28)' : 'rgba(245,158,11,0.3)';
+          ctx.fillStyle = b.pass ? 'rgba(56,189,248,0.28)' : (b.pwr ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.3)');
           ctx.beginPath(); ctx.arc(b.tr[i].x, b.tr[i].y, b.r*((i+1)/b.tr.length), 0, Math.PI*2); ctx.fill();
         }
       }
       ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.beginPath(); ctx.ellipse(b.x,b.y+4,b.r,b.r*0.55,0,0,Math.PI*2); ctx.fill();
       const vy = b.y - b.z*0.45, vr = b.r + b.z*0.05;
-      if (b.state==='thrown') { ctx.beginPath(); ctx.arc(b.x,vy,vr+4,0,Math.PI*2); ctx.fillStyle=b.pass?'rgba(56,189,248,0.35)':'rgba(251,191,36,0.45)'; ctx.fill(); }
-      ctx.fillStyle='#f59e0b'; ctx.strokeStyle='#78350f'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(b.x,vy,vr,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      if (b.state==='thrown') { ctx.beginPath(); ctx.arc(b.x,vy,vr+4,0,Math.PI*2); ctx.fillStyle=b.pass?'rgba(56,189,248,0.35)':(b.pwr?'rgba(239,68,68,0.45)':'rgba(251,191,36,0.45)'); ctx.fill(); }
+      ctx.fillStyle=b.state==='thrown'&&b.pwr?'#fb7185':'#f59e0b'; ctx.strokeStyle='#78350f'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(b.x,vy,vr,0,Math.PI*2); ctx.fill(); ctx.stroke();
     }
 
     for (const pt of st.parts) {
@@ -589,18 +726,43 @@ window.onerror = function(msg, url, line) {
     if (st.mode==='play') {
       const hp = st.players.find(p=>p.team==='blue'&&p.hum);
       fab.classList.add('visible');
-      if (hp && hp.ball) { fab.classList.remove('dodge','cd'); fab.innerHTML='🔥<br>TIR<br>AUTO'; }
+      if (hp && hp.transit) { fab.classList.add('dodge','cd'); fab.innerHTML='🚶<br>EN<br>MARCHE'; }
+      else if (hp && hp.ball) { fab.classList.remove('dodge','cd'); fab.innerHTML='🔥<br>TIR<br>AUTO'; }
       else { fab.classList.add('dodge'); fab.innerHTML='⚡<br>ESQUIVE<br>CATCH'; fab.classList.toggle('cd', !hp||hp.dCd>0); }
     } else fab.classList.remove('visible');
+  }
+
+  function renderStatsModal() {
+    const body = document.getElementById('statsBody');
+    const labels = [['spd','⚡ Vit'],['acc','🎯 Préc'],['pwr','💪 Force'],['cat','🧤 Catch']];
+    let html = '';
+    for (const [team, title, col] of [['blue','🔵 Équipe Bleue','#93c5fd'], ['red','🔴 Équipe Rouge','#fca5a5']]) {
+      html += `<h3 style="color:${col}">${title}</h3>`;
+      const list = st.players.filter(p => p.team === team);
+      for (const p of list) {
+        const tag = (p.hum ? ' 👑 TOI' : '') + (p.isStar ? ' ⭐ STAR' : '');
+        html += `<div class="roster-card ${p.isStar?'star':''}">
+          <div class="roster-head"><span>Poule #${p.num}${tag}</span><span>${p.bench?'🪵 Banc':'🐔 Terrain'}</span></div>
+          <div class="bars">`;
+        for (const [k, lbl] of labels) {
+          const pct = Math.round(p.attrs[k] * 100);
+          const isBoost = p.isStar && p.starCats.includes(k);
+          html += `<div class="bar-row"><span style="width:52px;${isBoost?'color:#fde047;font-weight:800':''}">${lbl}</span><div class="bar-bg"><div class="bar-fill ${isBoost?'boost':''}" style="width:${pct}%"></div></div></div>`;
+        }
+        html += `</div></div>`;
+      }
+    }
+    body.innerHTML = html;
   }
 
   function toLog(cx, cy) { const r=canvas.getBoundingClientRect(); return { x:((cx-r.left)/r.width)*W, y:((cy-r.top)/r.height)*H }; }
   function tapAt(lx, ly) {
     if (st.mode!=='play' || st.paused || st.over) return;
-    const hp = st.players.find(p=>p.team==='blue'&&p.hum); if (!hp) return;
+    const hp = st.players.find(p=>p.team==='blue'&&p.hum);
+    if (!hp || hp.transit) return;
     if (hp.ball) {
       let mate=null, bd=36;
-      for (const m of st.players) if (m!==hp && m.team==='blue') { const d=Math.hypot(m.x-lx,m.y-ly); if(d<bd){bd=d;mate=m;} }
+      for (const m of st.players) if (m!==hp && !m.transit && m.team==='blue') { const d=Math.hypot(m.x-lx,m.y-ly); if(d<bd){bd=d;mate=m;} }
       if (mate) throwBall(hp, mate.x+mate.vx*.15, mate.y+mate.vy*.15, {pass:true});
       else throwBall(hp, lx, ly, {pass:false});
     } else {
@@ -674,6 +836,11 @@ window.onerror = function(msg, url, line) {
   document.getElementById('btnHelp').addEventListener('click', ()=>hm.classList.add('open'));
   document.getElementById('btnCloseHelp').addEventListener('click', ()=>hm.classList.remove('open'));
   hm.addEventListener('click', e => { if(e.target===hm) hm.classList.remove('open'); });
+
+  const sm = document.getElementById('statsModal');
+  document.getElementById('btnStats').addEventListener('click', ()=>{ renderStatsModal(); sm.classList.add('open'); });
+  document.getElementById('btnCloseStats').addEventListener('click', ()=>sm.classList.remove('open'));
+  sm.addEventListener('click', e => { if(e.target===sm) sm.classList.remove('open'); });
 
   let last = performance.now();
   function loop(now) {
