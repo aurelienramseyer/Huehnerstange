@@ -8,33 +8,99 @@
     :root { --bg:#111827; --panel:#1f2937; --p2:#374151; --txt:#f9fafb; --mut:#9ca3af; --gold:#f59e0b; }
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
     html,body { margin:0; padding:0; width:100%; height:100%; background:var(--bg); color:var(--txt); font-family:system-ui,-apple-system,sans-serif; overflow:hidden; overscroll-behavior:none; }
-    .app { display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:520px; margin:0 auto; padding:6px 8px; gap:6px; }
-    .topbar, .controls { background:var(--panel); border-radius:14px; padding:6px 10px; flex-shrink:0; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; gap:5px; }
-    .scoreboard { display:flex; align-items:center; gap:5px; font-weight:800; font-size:13px; }
-    .pill { display:flex; align-items:center; gap:4px; padding:4px 7px; border-radius:10px; }
+    .app { display:flex; flex-direction:column; height:100vh; height:100dvh; width:100%; max-width:620px; margin:0 auto; padding:4px 6px; gap:5px; }
+    .topbar, .controls { background:var(--panel); border-radius:12px; padding:5px 8px; flex-shrink:0; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:4px; }
+    .scoreboard { display:flex; align-items:center; gap:5px; font-weight:800; font-size:12.5px; }
+    .pill { display:flex; align-items:center; gap:3px; padding:3px 7px; border-radius:9px; }
     .pill.red { background:rgba(239,68,68,.2); color:#fca5a5; border:1px solid rgba(239,68,68,.4); }
     .pill.blue { background:rgba(59,130,246,.2); color:#93c5fd; border:1px solid rgba(59,130,246,.4); }
     .top-actions { display:flex; gap:4px; }
-    button { border:none; border-radius:10px; background:var(--p2); color:var(--txt); font-weight:700; font-size:12px; padding:7px 9px; cursor:pointer; }
+    button { border:none; border-radius:9px; background:var(--p2); color:var(--txt); font-weight:700; font-size:12px; padding:6px 8px; cursor:pointer; }
     button:active { transform:scale(.94); }
     button.active { background:var(--gold); color:#111827; }
     button.green-btn { background:#10b981; color:#052e16; }
-    .modebar { display:grid; grid-template-columns:1fr 1fr; gap:6px; flex-shrink:0; }
-    .mode-btn { padding:8px; border-radius:12px; font-size:12.5px; background:var(--panel); border:1.5px solid transparent; }
+
+    .modebar { display:grid; grid-template-columns:1fr 1fr; gap:5px; flex-shrink:0; }
+    .mode-btn { padding:6px; border-radius:10px; font-size:12px; background:var(--panel); border:1.5px solid transparent; }
     .mode-btn.selected { background:rgba(245,158,11,.16); border-color:var(--gold); color:#fde68a; }
-    .stage-wrap { position:relative; flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
-    canvas { display:block; border-radius:16px; touch-action:none; background:#d99b60; box-shadow:0 8px 28px rgba(0,0,0,.45); }
-    .fab { position:absolute; right:12px; bottom:12px; width:72px; height:72px; border-radius:50%; background:linear-gradient(145deg,#f59e0b,#d97706); color:#111827; font-weight:900; font-size:11px; line-height:1.15; border:2px solid #fef3c7; display:none; flex-direction:column; align-items:center; justify-content:center; z-index:5; touch-action:none; box-shadow:0 6px 18px rgba(0,0,0,.45); }
-    .fab.visible { display:flex; }
-    .fab.dodge { background:linear-gradient(145deg,#38bdf8,#0284c7); color:#fff; border-color:#e0f2fe; }
-    .fab.cd { opacity:.45; }
-    .controls { display:flex; flex-direction:column; gap:6px; }
+
+    /* MAIN STAGE: LEFT CONTROL PAD + COURT */
+    .stage-wrap { position:relative; flex:1; min-height:0; display:flex; flex-direction:row; align-items:stretch; gap:6px; }
+    .left-pad {
+      display:none;
+      width:clamp(76px, 22vw, 108px);
+      flex-shrink:0;
+      background:linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border:1.5px solid rgba(255,255,255,0.14);
+      border-radius:14px;
+      position:relative;
+      overflow:hidden;
+      touch-action:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+    .left-pad.visible { display:flex; }
+    .pad-guide {
+      pointer-events:none;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      color:rgba(255,255,255,0.35);
+      font-size:10px;
+      font-weight:800;
+      text-align:center;
+      padding:6px;
+    }
+    .pad-circle {
+      width:54px; height:54px; border-radius:50%;
+      border:2px dashed rgba(255,255,255,0.2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+    }
+    .joy-ring {
+      position:absolute; width:64px; height:64px; margin:-32px 0 0 -32px;
+      border-radius:50%; background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.5);
+      pointer-events:none; opacity:0; transition:opacity .1s;
+    }
+    .joy-knob {
+      position:absolute; width:28px; height:28px; margin:-14px 0 0 -14px;
+      border-radius:50%; background:rgba(251,191,36,0.92); box-shadow:0 2px 8px rgba(0,0,0,0.4);
+      pointer-events:none; opacity:0; transition:opacity .1s;
+    }
+
+    .canvas-box { flex:1; min-width:0; height:100%; display:flex; align-items:center; justify-content:center; }
+    canvas { display:block; border-radius:14px; touch-action:none; background:#d99b60; box-shadow:0 6px 22px rgba(0,0,0,.45); }
+
+    /* BOTTOM CONTROLS */
+    .controls { display:flex; flex-direction:column; gap:5px; }
     .ctrl-row { display:flex; align-items:center; justify-content:space-between; gap:5px; flex-wrap:wrap; }
-    .ctrl-grp { display:flex; align-items:center; gap:4px; }
+    .ctrl-grp { display:flex; align-items:center; gap:3px; }
     .lbl { font-size:11px; color:var(--mut); font-weight:700; }
-    .stats { display:flex; justify-content:space-around; font-size:11px; color:var(--mut); border-top:1px solid rgba(255,255,255,.08); padding-top:5px; }
+
+    .play-bar { display:none; align-items:center; justify-content:space-between; gap:8px; }
+    .play-bar.visible { display:flex; }
+    .play-hint { font-size:11px; color:#d1d5db; line-height:1.3; flex:1; }
+    .act-btn {
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:900;
+      font-size:12.5px;
+      min-width:128px;
+      background:linear-gradient(145deg,#f59e0b,#d97706);
+      color:#111827;
+      border:1.5px solid #fef3c7;
+      box-shadow:0 3px 10px rgba(0,0,0,0.35);
+      touch-action:none;
+    }
+    .act-btn.dodge { background:linear-gradient(145deg,#38bdf8,#0284c7); color:#fff; border-color:#e0f2fe; }
+    .act-btn.cd { opacity:.45; }
+
+    .stats { display:flex; justify-content:space-around; font-size:11px; color:var(--mut); border-top:1px solid rgba(255,255,255,.08); padding-top:4px; }
     .stats b { color:#f3f4f6; }
+
     .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center; padding:14px; z-index:50; }
     .modal-bg.open { display:flex; }
     .modal { background:var(--panel); border-radius:18px; max-width:460px; width:100%; max-height:86vh; overflow-y:auto; padding:16px; font-size:13px; line-height:1.45; }
@@ -74,9 +140,21 @@
     <button class="mode-btn" id="modePlay">🎮 Jouer (Capitaine Bleu)</button>
   </div>
 
-  <div class="stage-wrap" id="stageWrap">
-    <canvas id="game"></canvas>
-    <button class="fab dodge" id="actionFab">⚡<br>ESQUIVE<br>CATCH</button>
+  <div class="stage-wrap">
+    <!-- ESPACE SPÉCIAL CONTRÔLE À GAUCHE (HORS TERRAIN) -->
+    <div class="left-pad" id="joyPad">
+      <div class="pad-guide">
+        <span>ZONE<br>CONTRÔLE</span>
+        <div class="pad-circle">🕹️</div>
+        <span>Glisser<br>pour<br>bouger</span>
+      </div>
+      <div class="joy-ring" id="joyRing"></div>
+      <div class="joy-knob" id="joyKnob"></div>
+    </div>
+
+    <div class="canvas-box" id="canvasBox">
+      <canvas id="game"></canvas>
+    </div>
   </div>
 
   <div class="controls">
@@ -86,9 +164,12 @@
       <div class="ctrl-grp"><span class="lbl">Éq.</span><button class="siz" data-v="4">4v4</button><button class="siz active" data-v="5">5v5</button><button class="siz" data-v="6">6v6</button></div>
       <button class="green-btn" id="btnReset">🔄</button>
     </div>
-    <div class="ctrl-row" id="playCtrl" style="display:none">
-      <div style="font-size:11.5px;color:#d1d5db;text-align:center;width:100%"><b>Glisser</b> : bouger • <b>Taper</b> : tirer/passer • <b>Bouton</b> : Esquive/Catch</div>
+
+    <div class="play-bar" id="playBar">
+      <div class="play-hint"><b>À gauche :</b> bouger<br><b>Taper terrain :</b> viser</div>
+      <button class="act-btn dodge" id="actionFab">⚡ ESQUIVE / CATCH</button>
     </div>
+
     <div class="stats">
       <span>⏱️ <b id="stTime">0s</b></span>
       <span>💥 Touches: <b id="stHits">0</b></span>
@@ -105,14 +186,14 @@
     <ul>
       <li><b>Banc dans le camp adverse :</b> Les Bleus jouent en bas (leur banc est tout en haut). Les Rouges jouent en haut (leur banc est tout en bas).</li>
       <li><b>Trajet à pied :</b> Les poules touchées ou libérées longent le bord du terrain à pied à vitesse normale pour rejoindre le banc ou leur camp.</li>
-      <li><b>Niveaux & Stars (⭐) :</b> Chaque poule a sa propre vitesse, précision, force et capacité à attraper. Chaque équipe possède <b>1 Star (⭐)</b> très forte dans <b>2 catégories aléatoires</b> (bouton <b>📊</b> pour voir les profils).</li>
+      <li><b>Niveaux & Stars (⭐) :</b> Chaque poule a sa propre vitesse, précision, force et capacité à attraper. Chaque équipe possède <b>1 Star (⭐)</b> très forte dans <b>2 catégories aléatoires</b> (bouton <b>📊</b>).</li>
       <li><b>Libération :</b> Toucher un adversaire depuis le banc te libère ! Rattraper un tir au vol (<i>Catch</i>) élimine le lanceur et libère un allié.</li>
     </ul>
     <h3>🎮 Contrôles (Mode Joueur)</h3>
     <ul>
-      <li><b>Glisser un doigt :</b> déplace ton capitaine bleu (👑), même sur le banc !</li>
-      <li><b>Taper sur l'écran (avec balle) :</b> tire vers cet endroit (ou passe si tu tapes près d'un allié).</li>
-      <li><b>Bouton rond :</b> Esquive/Catch (mains vides) ou Tir Auto (avec balle).</li>
+      <li><b>Zone à gauche du terrain :</b> glisse ton pouce gauche dans cette zone dédiée pour courir sans cacher le terrain ni les bancs !</li>
+      <li><b>Bouton en bas à droite :</b> Esquive/Catch (mains vides) ou Tir Auto (avec balle).</li>
+      <li><b>Taper sur le terrain (avec balle) :</b> lance vers l'endroit touché (ou passe si tu tapes près d'un allié).</li>
     </ul>
     <button style="width:100%;margin-top:12px;padding:10px;background:#3b82f6" id="btnCloseHelp">Fermer</button>
   </div>
@@ -136,9 +217,12 @@ window.onerror = function(msg, url, line) {
 (function() {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  const stageWrap = document.getElementById('stageWrap');
-  const W = 420, H = 720;
-  const C = { left:16, right:404, topW:14, botW:706, bBenchY:46, rBenchY:674, topLine:76, botLine:644, midY:360, bxMin:36, bxMax:384 };
+  const canvasBox = document.getElementById('canvasBox');
+  const joyPad = document.getElementById('joyPad');
+  const joyRing = document.getElementById('joyRing');
+  const joyKnob = document.getElementById('joyKnob');
+  const W = 400, H = 720;
+  const C = { left:16, right:384, topW:14, botW:706, bBenchY:46, rBenchY:674, topLine:76, botLine:644, midY:360, bxMin:34, bxMax:366 };
 
   function rrect(x, y, w, h, r) {
     ctx.beginPath();
@@ -150,8 +234,8 @@ window.onerror = function(msg, url, line) {
   }
 
   function resize() {
-    const rect = stageWrap.getBoundingClientRect();
-    let cw = rect.width || 320, ch = cw / (W / H), maxH = rect.height || 480;
+    const rect = canvasBox.getBoundingClientRect();
+    let cw = rect.width || 260, ch = cw / (W / H), maxH = rect.height || 460;
     if (ch > maxH) { ch = maxH; cw = ch * (W / H); }
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.style.width = Math.floor(cw) + 'px';
@@ -185,7 +269,7 @@ window.onerror = function(msg, url, line) {
     score:{red:0,blue:0}, time:0, sudden:false, over:false, winner:null, endT:0,
     stats:{hits:0,catches:0,freed:0}, players:[], balls:[], parts:[], pops:[]
   };
-  const inp = { keys:{}, moveId:null, j0:null, j1:null, jv:{x:0,y:0}, starts:new Map() };
+  const inp = { keys:{}, padTouchId:null, padMouseDown:false, j0:null, jv:{x:0,y:0} };
   const rand = (a,b) => a + Math.random()*(b-a);
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
   const dist = (a,b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -198,18 +282,12 @@ window.onerror = function(msg, url, line) {
     }
   }
 
-  // Generate random attributes (0..1 normalized, Stars get ~0.95..1.0 in 2 random categories!)
   function rollTeamAttrs(n) {
     const starIdx = Math.floor(Math.random() * n);
     const cats = ['spd', 'acc', 'pwr', 'cat'];
     const list = [];
     for (let i = 0; i < n; i++) {
-      const attrs = {
-        spd: rand(0.25, 0.72),
-        acc: rand(0.25, 0.75),
-        pwr: rand(0.25, 0.72),
-        cat: rand(0.20, 0.70)
-      };
+      const attrs = { spd: rand(0.25, 0.72), acc: rand(0.25, 0.75), pwr: rand(0.25, 0.72), cat: rand(0.20, 0.70) };
       let starCats = [];
       if (i === starIdx) {
         const shuffled = [...cats].sort(() => Math.random() - 0.5);
@@ -225,22 +303,21 @@ window.onerror = function(msg, url, line) {
   function startRound() {
     st.players=[]; st.balls=[]; st.parts=[]; st.pops=[];
     st.time=0; st.sudden=false; st.over=false; st.winner=null; st.endT=0;
-    const n = st.teamN, sp = (C.right - C.left - 80) / Math.max(1, n-1);
-    const redRolls = rollTeamAttrs(n);
-    const blueRolls = rollTeamAttrs(n);
+    const n = st.teamN, sp = (C.right - C.left - 76) / Math.max(1, n-1);
+    const redRolls = rollTeamAttrs(n), blueRolls = rollTeamAttrs(n);
 
     for (let i=0; i<n; i++) {
-      const px = C.left + 40 + i*sp;
+      const px = C.left + 38 + i*sp;
       const rr = redRolls[i], br = blueRolls[i];
       st.players.push({
-        num: i+1, team:'red', hum:false, x:px+rand(-10,10), y:C.midY-rand(95,165), vx:0, vy:0, r:14,
+        num: i+1, team:'red', hum:false, x:px+rand(-8,8), y:C.midY-rand(95,165), vx:0, vy:0, r:14,
         bench:false, transit:null, wps:[], slot:i, ball:null, ang:Math.PI/2,
         wait:0, dash:0, dCd:0, catW:0, inv:0, flap:rand(0,9),
         reactT:rand(0,0.22), dodgeT:0, dodgeX:0, dodgeY:0,
         attrs: rr.attrs, isStar: rr.isStar, starCats: rr.starCats
       });
       st.players.push({
-        num: i+1, team:'blue', hum:(i===Math.floor(n/2)), x:px+rand(-10,10), y:C.midY+rand(95,165), vx:0, vy:0, r:14,
+        num: i+1, team:'blue', hum:(i===Math.floor(n/2)), x:px+rand(-8,8), y:C.midY+rand(95,165), vx:0, vy:0, r:14,
         bench:false, transit:null, wps:[], slot:i, ball:null, ang:-Math.PI/2,
         wait:0, dash:0, dCd:0, catW:0, inv:0, flap:rand(0,9),
         reactT:rand(0,0.22), dodgeT:0, dodgeX:0, dodgeY:0,
@@ -248,7 +325,7 @@ window.onerror = function(msg, url, line) {
       });
     }
     for (let i=0; i<st.ballsN; i++) {
-      st.balls.push({ x:W/2+(i-(st.ballsN-1)/2)*75, y:C.midY+(i%2?-12:12), z:0, vx:0, vy:0, vz:0, r:9, state:'loose', own:null, team:null, thrower:null, fromBench:false, throwPwr:0.5, pass:false, pwr:false, tr:[] });
+      st.balls.push({ x:W/2+(i-(st.ballsN-1)/2)*70, y:C.midY+(i%2?-12:12), z:0, vx:0, vy:0, vz:0, r:9, state:'loose', own:null, team:null, thrower:null, fromBench:false, throwPwr:0.5, pass:false, pwr:false, tr:[] });
     }
     syncHUD();
   }
@@ -278,18 +355,15 @@ window.onerror = function(msg, url, line) {
   function throwBall(p, tx, ty, opts) {
     const b = p.ball; if (!b) return;
     p.ball = null; b.own = null; b.state = 'thrown'; b.team = p.team; b.thrower = p;
-    b.fromBench = p.bench;
-    b.throwPwr = p.attrs.pwr;
+    b.fromBench = p.bench; b.throwPwr = p.attrs.pwr;
     b.pass = !!(opts && opts.pass);
     b.pwr = !!(opts && opts.pwr) || (!b.pass && p.attrs.pwr >= 0.88);
     b.tr = [];
 
-    // Apply player's accuracy on manual throws slightly too (tiny variance if low acc, laser if high acc)
     let aimX = tx, aimY = ty;
     if (!b.pass && st.mode === 'play' && p.hum && !(opts && opts.auto)) {
       const jitter = (1 - p.attrs.acc) * 8;
-      aimX += rand(-jitter, jitter);
-      aimY += rand(-jitter, jitter);
+      aimX += rand(-jitter, jitter); aimY += rand(-jitter, jitter);
     }
 
     const dx = aimX - p.x, dy = aimY - p.y, d = Math.max(1, Math.hypot(dx, dy));
@@ -298,8 +372,7 @@ window.onerror = function(msg, url, line) {
     if (opts && opts.pwr && !b.pass) spd = Math.max(spd, 635);
     if (st.sudden && !b.pass) spd *= 1.15;
 
-    const G = 420;
-    const ft = clamp(d / spd, 0.14, 1.25);
+    const G = 420, ft = clamp(d / spd, 0.14, 1.25);
     b.x = p.x + (dx/d)*(p.r+6); b.y = p.y + (dy/d)*(p.r+6); b.z = 16;
     b.vx = (dx/d)*spd; b.vy = (dy/d)*spd;
     b.vz = 0.5 * G * ft - 2 / ft + (b.pass ? 45 : 0);
@@ -312,7 +385,6 @@ window.onerror = function(msg, url, line) {
     if (p.ball) { const b=p.ball; p.ball=null; b.own=null; b.state='loose'; b.z=0; b.vx=rand(-50,50); b.vy=rand(-50,50); }
     p.bench = true; p.inv = 0.6; p.dodgeT = 0;
 
-    // Walk along the nearest sideline to the bench (NO teleportation!)
     const sx = p.x < W / 2 ? C.left + 2 : C.right - 2;
     const benchY = p.team === 'blue' ? C.bBenchY : C.rBenchY;
     const benchX = clamp(C.bxMin + ((p.slot + 0.5) / st.teamN) * (C.bxMax - C.bxMin), C.bxMin, C.bxMax);
@@ -342,11 +414,10 @@ window.onerror = function(msg, url, line) {
     if (p.ball) { const b=p.ball; p.ball=null; b.own=null; b.state='loose'; b.z=0; b.vx=rand(-40,40); b.vy=rand(-40,40); }
     p.bench = false; p.inv = 1.2; p.dodgeT = 0;
 
-    // Walk back along the nearest sideline to own half (NO teleportation!)
     const sx = p.x < W / 2 ? C.left + 2 : C.right - 2;
     const homeY = p.team === 'blue' ? C.midY + 95 : C.midY - 95;
-    const sp = (C.right - C.left - 80) / Math.max(1, st.teamN - 1);
-    const homeX = clamp(C.left + 40 + p.slot * sp, 60, W - 60);
+    const sp = (C.right - C.left - 76) / Math.max(1, st.teamN - 1);
+    const homeX = clamp(C.left + 38 + p.slot * sp, 55, W - 55);
     p.transit = 'toCourt';
     p.wps = [
       { x: sx, y: p.y },
@@ -383,38 +454,24 @@ window.onerror = function(msg, url, line) {
   function updateTransit(p, dt) {
     if (!p.wps || p.wps.length === 0) {
       if (p.transit === 'toCourt') p.inv = 0.8;
-      p.transit = null; p.vx = 0; p.vy = 0;
-      return;
+      p.transit = null; p.vx = 0; p.vy = 0; return;
     }
-    const wp = p.wps[0];
-    const dx = wp.x - p.x, dy = wp.y - p.y;
-    const d = Math.hypot(dx, dy);
-    // Normal walking speed along the court sideline
+    const wp = p.wps[0], dx = wp.x - p.x, dy = wp.y - p.y, d = Math.hypot(dx, dy);
     const walkSpd = 140 + p.attrs.spd * 35;
     if (d < 8) {
-      p.x = wp.x; p.y = wp.y;
-      p.wps.shift();
-      if (p.wps.length === 0) {
-        if (p.transit === 'toCourt') p.inv = 0.8;
-        p.transit = null; p.vx = 0; p.vy = 0;
-      }
+      p.x = wp.x; p.y = wp.y; p.wps.shift();
+      if (p.wps.length === 0) { if (p.transit === 'toCourt') p.inv = 0.8; p.transit = null; p.vx = 0; p.vy = 0; }
     } else {
-      p.vx = (dx / d) * walkSpd;
-      p.vy = (dy / d) * walkSpd;
-      p.ang = Math.atan2(p.vy, p.vx);
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
+      p.vx = (dx / d) * walkSpd; p.vy = (dy / d) * walkSpd;
+      p.ang = Math.atan2(p.vy, p.vx); p.x += p.vx * dt; p.y += p.vy * dt;
     }
   }
 
   function updateAI(p, dt) {
-    p.wait = Math.max(0, p.wait - dt);
-    p.reactT -= dt;
-    p.dodgeT = Math.max(0, p.dodgeT - dt);
+    p.wait = Math.max(0, p.wait - dt); p.reactT -= dt; p.dodgeT = Math.max(0, p.dodgeT - dt);
     const bnd = bounds(p);
     let mx=0, my=0;
 
-    // 1. Reaction-delayed dodge (faster/more alert if high speed!)
     if (!p.bench && p.reactT <= 0) {
       p.reactT = rand(0.18, 0.30) - p.attrs.spd * 0.05;
       let threat = null, minT = 9999;
@@ -431,14 +488,11 @@ window.onerror = function(msg, url, line) {
       if (threat && Math.random() < (0.65 + p.attrs.spd * 0.25)) {
         const s = Math.hypot(threat.vx, threat.vy)||1, nx = -threat.vy/s, ny = threat.vx/s;
         const side = ((p.x-threat.x)*nx + (p.y-threat.y)*ny)>=0 ? 1 : -1;
-        p.dodgeX = nx * side * 1.45;
-        p.dodgeY = ny * side * 1.45;
-        p.dodgeT = 0.24;
+        p.dodgeX = nx * side * 1.45; p.dodgeY = ny * side * 1.45; p.dodgeT = 0.24;
       }
     }
     if (p.dodgeT > 0) { mx += p.dodgeX; my += p.dodgeY; }
 
-    // 2. Grab loose balls
     if (!p.ball && p.dodgeT <= 0) {
       let best=null, bd=Infinity;
       for (const b of st.balls) {
@@ -453,7 +507,6 @@ window.onerror = function(msg, url, line) {
       if (best) { const d = dist(p,best)||1; mx += ((best.x-p.x)/d)*1.5; my += ((best.y-p.y)/d)*1.5; }
     }
 
-    // 3. Throw or pass (using player's accuracy & power!)
     if (p.ball && p.wait<=0) {
       const en = st.players.filter(e => e.team!==p.team && !e.bench && !e.transit);
       const bm = st.players.filter(m => m.team===p.team && m.bench && !m.transit);
@@ -474,16 +527,14 @@ window.onerror = function(msg, url, line) {
       }
     }
 
-    // 4. Natural roaming & separation
     if (Math.hypot(mx,my) < 0.2) {
       if (p.bench) {
-        const tx = C.bxMin + ((p.slot+0.5)/st.teamN)*(C.bxMax-C.bxMin) + Math.sin(st.time*2+p.slot)*40;
+        const tx = C.bxMin + ((p.slot+0.5)/st.teamN)*(C.bxMax-C.bxMin) + Math.sin(st.time*2+p.slot)*38;
         const ty = p.team==='blue' ? C.bBenchY : C.rBenchY;
-        mx += clamp((tx-p.x)*0.04, -0.8, 0.8);
-        my += clamp((ty-p.y)*0.05, -0.6, 0.6);
+        mx += clamp((tx-p.x)*0.04, -0.8, 0.8); my += clamp((ty-p.y)*0.05, -0.6, 0.6);
       } else {
         const ty = (p.team==='blue'?C.midY+130:C.midY-130) + (p.team==='blue'?(p.ball?-35:20):(p.ball?35:-20));
-        const tx = 65 + ((p.slot+0.5)/st.teamN)*(W-130) + Math.sin(st.time*1.4+p.slot*2)*42;
+        const tx = 60 + ((p.slot+0.5)/st.teamN)*(W-120) + Math.sin(st.time*1.4+p.slot*2)*40;
         mx += clamp((tx-p.x)*0.025, -0.65, 0.65); my += clamp((ty-p.y)*0.025, -0.65, 0.65);
       }
     }
@@ -493,8 +544,7 @@ window.onerror = function(msg, url, line) {
         if (d>0 && d<40) { mx += ((p.x-o.x)/d)*((40-d)/40)*1.1; my += ((p.y-o.y)/d)*((40-d)/40)*1.1; }
       }
     }
-    const mag = Math.hypot(mx, my);
-    const baseSpd = (p.bench ? 95 : 88) + p.attrs.spd * 62; // ~103..150 px/s
+    const mag = Math.hypot(mx, my), baseSpd = (p.bench ? 95 : 88) + p.attrs.spd * 62;
     if (mag > 0.05) { p.vx=(mx/mag)*baseSpd*Math.min(1,mag); p.vy=(my/mag)*baseSpd*Math.min(1,mag); if(!p.ball) p.ang=Math.atan2(p.vy,p.vx); }
     else { p.vx*=0.8; p.vy*=0.8; }
   }
@@ -504,8 +554,7 @@ window.onerror = function(msg, url, line) {
     if (inp.keys.KeyA||inp.keys.ArrowLeft) mx-=1; if (inp.keys.KeyD||inp.keys.ArrowRight) mx+=1;
     if (inp.keys.KeyW||inp.keys.ArrowUp) my-=1; if (inp.keys.KeyS||inp.keys.ArrowDown) my+=1;
     if (Math.hypot(inp.jv.x, inp.jv.y)>0.05) { mx=inp.jv.x; my=inp.jv.y; }
-    const mag = Math.hypot(mx, my);
-    const spd = (145 + p.attrs.spd * 55) * (p.dash>0 ? 1.85 : 1);
+    const mag = Math.hypot(mx, my), spd = (145 + p.attrs.spd * 55) * (p.dash>0 ? 1.85 : 1);
     if (mag>0.05) { p.vx=(mx/mag)*spd*Math.min(1,mag); p.vy=(my/mag)*spd*Math.min(1,mag); p.ang=Math.atan2(p.vy,p.vx); }
     else if (p.dash>0) { p.vx=Math.cos(p.ang)*spd; p.vy=Math.sin(p.ang)*spd; }
     else { p.vx*=0.72; p.vy*=0.72; }
@@ -515,7 +564,6 @@ window.onerror = function(msg, url, line) {
     if (st.paused) return;
     const edt = dt * st.speed;
     if (st.over) {
-      // Allow walking players to continue walking nicely while banner shows
       for (const p of st.players) if (p.transit) { p.flap += dt*9; updateTransit(p, dt); }
       st.endT -= dt; updateParts(dt);
       if (st.endT <= 0) startRound();
@@ -527,11 +575,7 @@ window.onerror = function(msg, url, line) {
     for (const p of st.players) {
       p.dash=Math.max(0,p.dash-edt); p.dCd=Math.max(0,p.dCd-edt); p.catW=Math.max(0,p.catW-edt); p.inv=Math.max(0,p.inv-edt);
       p.flap += edt*(Math.hypot(p.vx,p.vy)*0.08+3);
-
-      if (p.transit) {
-        updateTransit(p, edt);
-        continue;
-      }
+      if (p.transit) { updateTransit(p, edt); continue; }
 
       if (st.mode==='play' && p.hum) updateHuman(p); else updateAI(p, edt);
       p.x += p.vx*edt; p.y += p.vy*edt;
@@ -554,9 +598,7 @@ window.onerror = function(msg, url, line) {
         if (b.y<C.topW+b.r){b.y=C.topW+b.r;b.vy=Math.abs(b.vy)*.65;}
         if (b.y>C.botW-b.r){b.y=C.botW-b.r;b.vy=-Math.abs(b.vy)*.65;}
         for (const p of st.players) {
-          if (!p.transit && !p.ball && dist(p,b) < p.r+b.r+8) {
-            b.state='held'; b.own=p; b.vx=0; b.vy=0; b.vz=0; p.ball=b; p.wait=rand(.15,.38); break;
-          }
+          if (!p.transit && !p.ball && dist(p,b) < p.r+b.r+8) { b.state='held'; b.own=p; b.vx=0; b.vy=0; b.vz=0; p.ball=b; p.wait=rand(.15,.38); break; }
         }
       } else if (b.state==='thrown') {
         b.tr.push({x:b.x, y:b.y-b.z*0.45}); if (b.tr.length>7) b.tr.shift();
@@ -585,7 +627,6 @@ window.onerror = function(msg, url, line) {
           }
           if (b.pass || p.inv>0) continue;
 
-          // Catch ability vs thrower's power!
           const aiCatch = (0.02 + p.attrs.cat * 0.28) * (1 - b.throwPwr * 0.28);
           const caught = !p.ball && (p.catW>0 || (!(st.mode==='play'&&p.hum) && Math.random()<aiCatch));
           if (caught) {
@@ -666,15 +707,11 @@ window.onerror = function(msg, url, line) {
       ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(6,-4.5,1.4,0,Math.PI*2); ctx.arc(6,4.5,1.4,0,Math.PI*2); ctx.fill();
       ctx.restore();
 
-      // Overhead icon: Crown (Human), Star (Team Star), or Walking
       let badge = '';
       if (st.mode==='play' && p.hum) badge += '👑';
       if (p.isStar) badge += '⭐';
       if (p.transit) badge += '🚶';
-      if (badge) {
-        ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(badge, p.x, p.y - p.r - 6);
-      }
+      if (badge) { ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(badge, p.x, p.y - p.r - 6); }
     }
 
     for (const b of [...st.balls].sort((a,c)=>a.z-c.z)) {
@@ -699,14 +736,10 @@ window.onerror = function(msg, url, line) {
       ctx.lineWidth=3; ctx.strokeStyle='rgba(0,0,0,0.75)'; ctx.strokeText(pp.txt,pp.x,pp.y);
       ctx.fillStyle=pp.col; ctx.fillText(pp.txt,pp.x,pp.y); ctx.restore();
     }
-    if (st.mode==='play' && inp.j0 && inp.j1) {
-      ctx.beginPath(); ctx.arc(inp.j0.x,inp.j0.y,34,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.14)'; ctx.strokeStyle='rgba(255,255,255,0.45)'; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
-      ctx.beginPath(); ctx.arc(inp.j1.x,inp.j1.y,15,0,Math.PI*2); ctx.fillStyle='rgba(251,191,36,0.85)'; ctx.fill();
-    }
     if (st.over) {
-      ctx.fillStyle='rgba(17,24,39,0.75)'; ctx.fillRect(36,C.midY-44,W-72,88);
-      ctx.strokeStyle='#fbbf24'; ctx.lineWidth=2.5; ctx.strokeRect(36,C.midY-44,W-72,88);
-      ctx.textAlign='center'; ctx.fillStyle=st.winner==='blue'?'#93c5fd':'#fca5a5'; ctx.font='900 20px sans-serif';
+      ctx.fillStyle='rgba(17,24,39,0.75)'; ctx.fillRect(28,C.midY-44,W-56,88);
+      ctx.strokeStyle='#fbbf24'; ctx.lineWidth=2.5; ctx.strokeRect(28,C.midY-44,W-56,88);
+      ctx.textAlign='center'; ctx.fillStyle=st.winner==='blue'?'#93c5fd':'#fca5a5'; ctx.font='900 19px sans-serif';
       ctx.fillText(st.winner==='blue'?'🏆 VICTOIRE DES BLEUS !':'🏆 VICTOIRE DES ROUGES !', W/2, C.midY-4);
       ctx.fillStyle='#e5e7eb'; ctx.font='bold 12px sans-serif'; ctx.fillText('Nouvelle manche...', W/2, C.midY+24);
     }
@@ -725,11 +758,10 @@ window.onerror = function(msg, url, line) {
     document.getElementById('stFreed').textContent = st.stats.freed;
     if (st.mode==='play') {
       const hp = st.players.find(p=>p.team==='blue'&&p.hum);
-      fab.classList.add('visible');
-      if (hp && hp.transit) { fab.classList.add('dodge','cd'); fab.innerHTML='🚶<br>EN<br>MARCHE'; }
-      else if (hp && hp.ball) { fab.classList.remove('dodge','cd'); fab.innerHTML='🔥<br>TIR<br>AUTO'; }
-      else { fab.classList.add('dodge'); fab.innerHTML='⚡<br>ESQUIVE<br>CATCH'; fab.classList.toggle('cd', !hp||hp.dCd>0); }
-    } else fab.classList.remove('visible');
+      if (hp && hp.transit) { fab.classList.add('dodge','cd'); fab.innerHTML='🚶 EN MARCHE...'; }
+      else if (hp && hp.ball) { fab.classList.remove('dodge','cd'); fab.innerHTML='🔥 TIR AUTO'; }
+      else { fab.classList.add('dodge'); fab.innerHTML='⚡ ESQUIVE / CATCH'; fab.classList.toggle('cd', !hp||hp.dCd>0); }
+    }
   }
 
   function renderStatsModal() {
@@ -755,8 +787,91 @@ window.onerror = function(msg, url, line) {
     body.innerHTML = html;
   }
 
+  // ===== LEFT DEDICATED CONTROL PAD (TOUCH + MOUSE) =====
+  function updatePadVisual(ox, oy, kx, ky, active) {
+    if (!active) {
+      joyRing.style.opacity = '0';
+      joyKnob.style.opacity = '0';
+      return;
+    }
+    joyRing.style.opacity = '1';
+    joyKnob.style.opacity = '1';
+    joyRing.style.left = ox + 'px';
+    joyRing.style.top = oy + 'px';
+    joyKnob.style.left = kx + 'px';
+    joyKnob.style.top = ky + 'px';
+  }
+
+  function movePadTo(cx, cy) {
+    if (!inp.j0) return;
+    const rect = joyPad.getBoundingClientRect();
+    const lx = cx - rect.left, ly = cy - rect.top;
+    const dx = lx - inp.j0.x, dy = ly - inp.j0.y;
+    const maxR = 34, d = Math.hypot(dx, dy);
+    let kx = lx, ky = ly;
+    if (d > maxR) {
+      kx = inp.j0.x + (dx / d) * maxR;
+      ky = inp.j0.y + (dy / d) * maxR;
+      inp.jv = { x: dx / d, y: dy / d };
+    } else {
+      inp.jv = { x: dx / maxR, y: dy / maxR };
+    }
+    updatePadVisual(inp.j0.x, inp.j0.y, kx, ky, true);
+  }
+
+  joyPad.addEventListener('touchstart', e => {
+    resumeAudio();
+    if (st.mode !== 'play') return;
+    e.preventDefault();
+    if (inp.padTouchId === null && e.changedTouches.length > 0) {
+      const t = e.changedTouches[0];
+      const rect = joyPad.getBoundingClientRect();
+      inp.padTouchId = t.identifier;
+      inp.j0 = { x: t.clientX - rect.left, y: t.clientY - rect.top };
+      inp.jv = { x: 0, y: 0 };
+      updatePadVisual(inp.j0.x, inp.j0.y, inp.j0.x, inp.j0.y, true);
+    }
+  }, { passive: false });
+
+  joyPad.addEventListener('touchmove', e => {
+    if (st.mode !== 'play') return;
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (t.identifier === inp.padTouchId) movePadTo(t.clientX, t.clientY);
+    }
+  }, { passive: false });
+
+  function endPadTouch(e) {
+    for (const t of e.changedTouches) {
+      if (t.identifier === inp.padTouchId) {
+        inp.padTouchId = null; inp.j0 = null; inp.jv = { x: 0, y: 0 };
+        updatePadVisual(0, 0, 0, 0, false);
+      }
+    }
+  }
+  joyPad.addEventListener('touchend', endPadTouch, { passive: false });
+  joyPad.addEventListener('touchcancel', endPadTouch, { passive: false });
+
+  // Desktop mouse support on Left Pad
+  joyPad.addEventListener('mousedown', e => {
+    resumeAudio(); if (st.mode !== 'play') return;
+    const rect = joyPad.getBoundingClientRect();
+    inp.padMouseDown = true;
+    inp.j0 = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    inp.jv = { x: 0, y: 0 };
+    updatePadVisual(inp.j0.x, inp.j0.y, inp.j0.x, inp.j0.y, true);
+  });
+  window.addEventListener('mousemove', e => { if (inp.padMouseDown) movePadTo(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', () => {
+    if (inp.padMouseDown) {
+      inp.padMouseDown = false; inp.j0 = null; inp.jv = { x: 0, y: 0 };
+      updatePadVisual(0, 0, 0, 0, false);
+    }
+  });
+
+  // ===== TAP ON COURT TO AIM / PASS (OPTIONAL MANUAL AIM) =====
   function toLog(cx, cy) { const r=canvas.getBoundingClientRect(); return { x:((cx-r.left)/r.width)*W, y:((cy-r.top)/r.height)*H }; }
-  function tapAt(lx, ly) {
+  function tapCourt(lx, ly) {
     if (st.mode!=='play' || st.paused || st.over) return;
     const hp = st.players.find(p=>p.team==='blue'&&p.hum);
     if (!hp || hp.transit) return;
@@ -773,40 +888,12 @@ window.onerror = function(msg, url, line) {
 
   canvas.addEventListener('touchstart', e => {
     resumeAudio(); if (st.mode!=='play') return; e.preventDefault();
-    for (const t of e.changedTouches) {
-      const p = toLog(t.clientX, t.clientY);
-      inp.starts.set(t.identifier, {x:p.x, y:p.y, t:performance.now(), mv:false});
-      if (inp.moveId===null) { inp.moveId=t.identifier; inp.j0={x:p.x,y:p.y}; inp.j1={x:p.x,y:p.y}; }
-      else tapAt(p.x, p.y);
-    }
-  }, {passive:false});
+    const t = e.changedTouches[0];
+    const p = toLog(t.clientX, t.clientY);
+    tapCourt(p.x, p.y);
+  }, { passive: false });
+  canvas.addEventListener('mousedown', e => { resumeAudio(); if(st.mode==='play'){ const p=toLog(e.clientX,e.clientY); tapCourt(p.x,p.y); } });
 
-  canvas.addEventListener('touchmove', e => {
-    if (st.mode!=='play') return; e.preventDefault();
-    for (const t of e.changedTouches) {
-      const p = toLog(t.clientX, t.clientY), s = inp.starts.get(t.identifier);
-      if (s && Math.hypot(p.x-s.x, p.y-s.y)>10) s.mv = true;
-      if (t.identifier===inp.moveId && inp.j0) {
-        const dx=p.x-inp.j0.x, dy=p.y-inp.j0.y, d=Math.hypot(dx,dy);
-        if (d>34) { inp.j1={x:inp.j0.x+(dx/d)*34, y:inp.j0.y+(dy/d)*34}; inp.jv={x:dx/d, y:dy/d}; }
-        else { inp.j1=p; inp.jv={x:dx/34, y:dy/34}; }
-      }
-    }
-  }, {passive:false});
-
-  function endT(e) {
-    for (const t of e.changedTouches) {
-      const s = inp.starts.get(t.identifier);
-      if (t.identifier===inp.moveId) {
-        if (s && !s.mv && (performance.now()-s.t)<260) { const p=toLog(t.clientX,t.clientY); tapAt(p.x,p.y); }
-        inp.moveId=null; inp.j0=null; inp.j1=null; inp.jv={x:0,y:0};
-      }
-      inp.starts.delete(t.identifier);
-    }
-  }
-  canvas.addEventListener('touchend', endT, {passive:false});
-  canvas.addEventListener('touchcancel', endT, {passive:false});
-  canvas.addEventListener('mousedown', e => { resumeAudio(); if(st.mode==='play'){ const p=toLog(e.clientX,e.clientY); tapAt(p.x,p.y); } });
   window.addEventListener('keydown', e => { inp.keys[e.code]=true; if(e.code==='Space'&&st.mode==='play'){ e.preventDefault(); resumeAudio(); dashOrAct(st.players.find(p=>p.team==='blue'&&p.hum)); } });
   window.addEventListener('keyup', e => { inp.keys[e.code]=false; });
 
@@ -818,8 +905,11 @@ window.onerror = function(msg, url, line) {
     document.getElementById('modeSim').classList.toggle('selected', m==='sim');
     document.getElementById('modePlay').classList.toggle('selected', m==='play');
     document.getElementById('simCtrl').style.display = m==='sim' ? 'flex' : 'none';
-    document.getElementById('playCtrl').style.display = m==='play' ? 'flex' : 'none';
+    document.getElementById('playBar').classList.toggle('visible', m==='play');
+    joyPad.classList.toggle('visible', m==='play');
     if (m==='play') { st.speed=1; document.querySelectorAll('.spd').forEach(b=>b.classList.toggle('active', b.dataset.v==='1')); }
+    else { inp.padTouchId=null; inp.j0=null; inp.jv={x:0,y:0}; updatePadVisual(0,0,0,0,false); }
+    requestAnimationFrame(resize);
     syncHUD();
   }
   document.getElementById('modeSim').addEventListener('click', ()=>setMode('sim'));
